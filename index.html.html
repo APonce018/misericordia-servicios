@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Especialidades – Hospital Misericordia</title>
+<style>
+:root{--bg:#f4f7f7;--sf:#ffffff;--tx:#14282b;--mu:#587074;--bd:#d6e0e1;--ac:#0f766e;--hd:#e8f0f0;--g:#1d7a3f;--gb:#e0f2e6;--b:#1b5fa8;--bb:#e1edfa;--a:#9a5b00;--ab:#fcefd4;--p:#7a3d9a;--pb:#f0e4f7;box-sizing:border-box;color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1b;--sf:#162425;--tx:#e4eeee;--mu:#93acaf;--bd:#2a3f41;--ac:#4fd1c5;--hd:#1d3032;--g:#7fdc9e;--gb:#173a24;--b:#8fc0f5;--bb:#142e4a;--a:#f2c26b;--ab:#3d2e0e;--p:#d7a8ef;--pb:#35213f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1a1b;--sf:#162425;--tx:#e4eeee;--mu:#93acaf;--bd:#2a3f41;--ac:#4fd1c5;--hd:#1d3032;--g:#7fdc9e;--gb:#173a24;--b:#8fc0f5;--bb:#142e4a;--a:#f2c26b;--ab:#3d2e0e;--p:#d7a8ef;--pb:#35213f;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 2px;font-weight:650}
+.sub{color:var(--mu);margin:0 0 16px}
+.bar{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:8px;margin-bottom:10px}
+@media (max-width:800px){.bar{grid-template-columns:1fr 1fr}.bar .q{grid-column:1/-1}}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font:inherit}
+input:focus-visible,select:focus-visible,button:focus-visible,th:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+.meta{display:flex;justify-content:space-between;align-items:center;margin:6px 0 8px;color:var(--mu);font-size:13px}
+button{font:inherit;color:var(--ac);background:none;border:1px solid var(--bd);border-radius:6px;padding:5px 10px;cursor:pointer}
+.wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:8px;background:var(--sf)}
+table{width:100%;border-collapse:collapse;min-width:860px}
+th,td{text-align:left;padding:9px 12px;vertical-align:top;border-bottom:1px solid var(--bd)}
+th{background:var(--hd);font-size:13px;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0}
+th[aria-sort="ascending"]::after{content:" ▲";color:var(--ac)}
+th[aria-sort="descending"]::after{content:" ▼";color:var(--ac)}
+tr:last-child td{border-bottom:0}
+.t{display:inline-block;padding:1px 8px;border-radius:4px;font-size:13px;white-space:nowrap}
+.Adulto{color:var(--g);background:var(--gb)}.Pediátrico{color:var(--b);background:var(--bb)}.Todas{color:var(--a);background:var(--ab)}
+.cn{color:var(--p);background:var(--pb)}
+.obs{color:var(--mu);font-size:13px;max-width:260px}
+.empty{padding:28px;text-align:center;color:var(--mu)}
+</style>
+</head>
+<body>
+<main>
+<h1>Especialidades – Hospital Misericordia</h1>
+<p class="sub">Capital · Filtrá por servicio, población, derivación o canal de turnos.</p>
+<div class="bar">
+  <div class="q"><label for="q">Buscar</label><input id="q" type="search" placeholder="Ej: pediatría, salud mental, certificado…"></div>
+  <div><label for="fs">Servicio</label><select id="fs"></select></div>
+  <div><label for="fp">Población</label><select id="fp"></select></div>
+  <div><label for="fd">Derivación</label><select id="fd"></select></div>
+  <div><label for="fc">Canal</label><select id="fc"></select></div>
+</div>
+<div class="meta"><span id="count"></span><button id="clear" type="button">Limpiar filtros</button></div>
+<div class="wrap"><table>
+<thead><tr id="head"></tr></thead>
+<tbody id="body"></tbody>
+</table><div id="empty" class="empty" hidden>No hay resultados con esos filtros.</div></div>
+</main>
+<script>
+var COLS=[["Servicio",0],["Prestación",1],["Población",2],["Derivación",3],["Observaciones",4],["Canal",5]];
+var D="Con Derivación institución Pub-Priv",S="Sin Derivación",SM="Derivación Interna de Salud Mental",CC="Call/CIDI",V="Ventanilla",DI="Derivación Interna (de otro servicio del mismo hospital)";
+var ROWS=[
+["Alergia e Inmunología","Alergia e Inmunología","Adulto",D,"",CC],
+["Anestesiología","Anestesiología","Todas las edades",DI,"Deben presentar el preQx completo (Valoración Prequirúrgica lista). El turno debe ser para el mismo hospital de la Cirugía.","Call"],
+["Cardiología","Cardiología","Adulto",D,"",CC],
+["Cardiología Pediátrica","Cardiología Pediátrica","Pediátrico",D,"",CC],
+["Cardiología Pediátrica","Valoración Prequirúrgica Pediátrica","Pediátrico",D,"","Call"],
+["Centro de Adicciones","Centro de Adicciones","Adulto",S,"",V],
+["Cirugía","Cirugía General","Adulto",S,"",CC],
+["Cirugía Pediátrica","Cirugía General Pediátrica","Pediátrico",S,"",CC],
+["Cirugía Plástica","Cirugía Plástica","Adulto",D,"",CC],
+["Cirugía Torácica","Cirugía Torácica","Adulto",D,"",CC],
+["Clínica Médica","Clínica Médica","Adulto",S,"",CC],
+["Diabetología","Diabetología","Adulto",D,"",CC],
+["Discapacidad / Rehabilitación e Inclusión","Fisiatría","Todas las edades",DI,"",V],
+["Discapacidad / Rehabilitación e Inclusión","Fonoaudiología","Todas las edades",DI,"",V],
+["Discapacidad / Rehabilitación e Inclusión","Nutrición","Todas las edades",DI,"",V],
+["Endocrinología","Endocrinología","Adulto",D,"",V],
+["Fonoaudiología Pediátrica","Fonoaudiología Pediátrica","Pediátrico",D,"",CC],
+["Gastroenterología","Gastroenterología","Adulto",D,"",CC],
+["Gastroenterología Pediátrica","Gastroenterología Pediátrica","Pediátrico",D,"",V],
+["Hematología y Oncohematología","Hematología y Oncohematología","Adulto",D,"",V],
+["Infectología","Infectología","Adulto",D,"",CC],
+["Junta de Discapacidad","Junta de Discapacidad","Todas las edades",S,"Emite y renueva solo certificados de DISCAPACIDAD (se nace con ella).",V],
+["Medicina Familiar","Medicina Familiar","Todas las edades",S,"",CC],
+["Medicina Legal y Laboral","Medicina Legal y Laboral","Adulto",S,"Emite y renueva solo certificados de INCAPACIDAD (se adquiere durante la vida).",CC],
+["Medicina Preventiva","Medicina al viajero","Todas las edades",S,"",V],
+["Nefrología","Nefrología","Adulto",D,"",CC],
+["Neumonología","Neumonología","Adulto",D,"",CC],
+["Neumonología Pediátrica","Neumonología Pediátrica","Pediátrico",D,"",V],
+["Neurocirugía Pediátrica","Neurocirugía Pediátrica","Pediátrico",D,"",CC],
+["Neurología","Neurología","Adulto",D,"",CC],
+["Neurología Pediátrica","Neurología Pediátrica","Pediátrico",D,"",CC],
+["Nutrición","Nutrición","Adulto",S,"",CC],
+["Oftalmología","Oftalmología","Adulto",S,"",V],
+["Oftalmología Pediátrica","Oftalmología Pediátrica","Pediátrico",S,"",CC],
+["Oncología","Oncología","Adulto",D,"",CC],
+["Pediatría","Pediatría","Pediátrico",S,"",CC],
+["Pediatría","Pediatría Obesidad","Pediátrico",S,"",CC],
+["Reumatología","Reumatología","Adulto",D,"",CC],
+["Salud Mental","Psicología","Adulto",SM,"",V],
+["Salud Mental","Psicología Infanto-Juvenil","Pediátrico",SM,"",V],
+["Salud Mental","Psiquiatría","Adulto",SM,"",V],
+["Salud Mental","Psiquiatría Infanto-Juvenil","Pediátrico",SM,"",V],
+["Salud Mental","Servicio Social","Todas las edades",SM,"",V],
+["Servicio Social","Servicio Social","Todas las edades","Derivación Interna (de otro servicio del mismo hospital)","","Call"],
+["Traumatología","Traumatología","Adulto",S,"",CC],
+["Urología","Urología","Adulto",S,"",CC],
+["Vascular Periférico","Cirugía Vascular","Adulto",S,"",CC]
+];
+var $=function(i){return document.getElementById(i)};
+var norm=function(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()};
+var sel={fs:0,fp:2,fd:3,fc:5},sortCol=null,sortDir=1;
+function opts(col){var v=[],i;for(i=0;i<ROWS.length;i++)if(v.indexOf(ROWS[i][col])<0)v.push(ROWS[i][col]);return v.sort(function(a,b){return a.localeCompare(b,"es")})}
+Object.keys(sel).forEach(function(id){
+  var el=$(id),h='<option value="">Todos</option>';
+  opts(sel[id]).forEach(function(o){h+='<option>'+o+'</option>'});
+  el.innerHTML=h;el.addEventListener("change",render);
+});
+$("q").addEventListener("input",render);
+$("clear").addEventListener("click",function(){$("q").value="";Object.keys(sel).forEach(function(id){$(id).value=""});render()});
+var head=$("head");
+COLS.forEach(function(c){
+  var th=document.createElement("th");th.textContent=c[0];th.tabIndex=0;th.setAttribute("aria-sort","none");
+  var go=function(){sortDir=(sortCol===c[1]?-sortDir:1);sortCol=c[1];render()};
+  th.addEventListener("click",go);
+  th.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
+  th.dataset.col=c[1];head.appendChild(th);
+});
+function tag(cls,t){return t?'<span class="t '+cls+'">'+t+'</span>':""}
+function render(){
+  var q=norm($("q").value.trim()),f=[];
+  ROWS.forEach(function(r){
+    for(var id in sel){if($(id).value&&r[sel[id]]!==$(id).value)return}
+    if(q&&norm(r.join(" ")).indexOf(q)<0)return;
+    f.push(r);
+  });
+  if(sortCol!==null)f.sort(function(a,b){return a[sortCol].localeCompare(b[sortCol],"es")*sortDir});
+  var h="";
+  f.forEach(function(r){
+    var pc=r[2].split(" ")[0];
+    h+="<tr><td>"+r[0]+"</td><td>"+r[1]+"</td><td>"+tag(pc,r[2])+"</td><td>"+r[3]+'</td><td class="obs">'+r[4]+"</td><td>"+tag("cn",r[5])+"</td></tr>";
+  });
+  $("body").innerHTML=h;
+  $("empty").hidden=f.length>0;
+  $("count").textContent="Mostrando "+f.length+" de "+ROWS.length+" prestaciones";
+  Array.prototype.forEach.call(head.children,function(th){th.setAttribute("aria-sort",Number(th.dataset.col)===sortCol?(sortDir>0?"ascending":"descending"):"none")});
+}
+render();
+</script>
+</body>
+</html>
